@@ -5,8 +5,8 @@ import Line from "./Line";
 const CANVAS_SIZE = 800;
 
 new p5((p5: p5) => {
-  const pointsGroup: Point[][] = [];
-  const linesGroup: Line[][] = [];
+  const points: Point[] = [];
+  const linesList: Line[][] = [];
   let t = 0;
   const finalLinePoints: Point[] = [];
 
@@ -19,28 +19,31 @@ new p5((p5: p5) => {
     p5.createCanvas(CANVAS_SIZE, CANVAS_SIZE);
     const clear = p5.createButton("clear");
     clear.mouseClicked(() => {
-      pointsGroup.splice(0);
-      linesGroup.splice(0);
+      points.splice(0);
+      linesList.splice(0);
     });
   };
 
   p5.draw = () => {
-    p5.background(0)
+    p5.background(0);
     p5.stroke(255);
-    for (let i = 0; i < pointsGroup[0]?.length; i++) {
-      const point = pointsGroup[0]?.[i];
+    for (let i = 0; i < points.length; i++) {
+      const point = points[i];
       point.draw(i);
     }
 
-    for (let i = 0; i < linesGroup.length; i++) {
-      const lines = linesGroup[i];
+    for (let i = 0; i < linesList.length; i++) {
+      const lines = linesList[i];
       for (let j = 0; j < lines.length; j++) {
         const line = lines[j];
         line.draw(t);
       }
     }
-    const p = pointsGroup[pointsGroup.length - 1]?.[0].clone();
-    if (p) finalLinePoints.push(p);
+    const p = linesList[linesList.length - 1]?.[0]?.TPoint?.clone();
+
+    if (p) {
+      finalLinePoints.push(p);
+    }
 
     p5.noFill();
     p5.stroke(255, 0, 0);
@@ -68,30 +71,25 @@ new p5((p5: p5) => {
       return;
     reset();
     const p = new Point(p5, p5.mouseX, p5.mouseY);
-    if (!pointsGroup[0]) pointsGroup.push([]);
-    pointsGroup.splice(1);
-    linesGroup.splice(0);
-    linesGroup.push([]);
-    const points = pointsGroup[0];
+    linesList.splice(0);
+    linesList.push([]);
     points.push(p);
 
     const generateLines = (points: Point[], index = 0) => {
       const newPoints = [];
       for (let i = 0; i < points.length - 1; i++) {
+        if (!linesList[index]) linesList[index] = [];
         const point1 = points[i];
         const point2 = points[i + 1];
-        if (!linesGroup[index]) linesGroup[index] = [];
         const line = new Line(p5, point1, point2);
-        newPoints.push(line.getPointFromT(0));
-        linesGroup[index].push(line);
+        newPoints.push(line.TPoint);
+        linesList[index].push(line);
       }
       if (newPoints.length) {
-        pointsGroup.push(newPoints);
-        generateLines(newPoints, index++);
+        generateLines(newPoints, ++index);
       }
     };
 
     generateLines(points);
-    console.log(pointsGroup);
   };
 });
